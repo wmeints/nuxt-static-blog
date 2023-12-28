@@ -2,20 +2,19 @@
 title: "Building a static blog with Nuxt"
 ---
 
-Welcome to this static blog website. This post is a sample post that explains how this static website was created. 
-Although you don't need to follow these steps anymore, since you're already up and running, I recommend reading
-this post because it explains a couple of important choices I made when designing this setup.
+
 
 ## Getting started
 
-The basis for this blog is Nuxt, a framework on top of Vue. It adds extra functionality to turn Vue from a client-side
-framework into a fully featured website building tool. To set up the static blog site, I followed these steps:
+The basis for my blog going forward is Nuxt, a framework on top of Vue. It adds extra functionality to turn Vue
+from a client-side framework into a fully featured website building tool. To set up the static blog site, 
+I followed these steps:
 
 1. Create a new project by executing `npx nuxi@latest init <project-name>`.
 2. Follow the instructions to set up the project. I recommend using TypeScript.
 
-Since this is a static blog we need tools to write content easily. [The content module][CONTENT_MODULE] provided by
-Nuxt makes it easier to write content in Markdown and later render it to HTML.
+To render content on the blog I used the [Content module][CONTENT_MODULE] for Nuxt. This module allows you to write
+markdown content in a separate folder that can then be rendered on the website using Vue components.
 
 I added the content module to the website using this command:
 
@@ -31,15 +30,15 @@ npx nuxi@latest module add @nuxtjs/tailwindcss
 npm install -D @tailwindcss/typography
 ```
 
-After installing the Tailwind CSS components, we'll need to generate a configuration file. I used the following command
-to generate the configuration for Tailwind CSS:
+After installing the Tailwind CSS components, I generated a new configuration file for the Tailwind CSS framework
+using the following command:
 
 ```bash
 npx tailwindcss init
 ```
 
-Once the configuration is created, I modified it to include the typograph addon. After modification, this is what I got
-as the configuration file:
+Once the configuration was created, I modified it to include the typography addon. This is what I got
+as the configuration file after adding the typography addon:
 
 ```javascript
 /** @type {import('tailwindcss').Config} */
@@ -52,24 +51,13 @@ export default {
 }
 ```
 
-With the configuration in place it's time to generate static content on the website.
+With the configuration in place it was time to start adding some content into the website. 
 
 ## Rendering content
 
-There are many ways to create a blog website. You can use Wordpress, Ghost, or any of the other pre-made website
-tools. These tools allow you to edit content from their admin panel and you don't need to worry about editing code. 
-Unless of course you want to modify something in the website tool itself.
-
-The alternative, the static website offers other interesting perks. You can write code to your hearts desire. Which
-can you can also interpret as a negative. You write content on your computer, run a generator, and deploy the result.
-The advantage here is that you get a static website that's super hard to modify by hackers. It's also super fast.
-
-I prefer the static route for obvious reasons, I'm a software engineer, I know how to code. I also like the security and
-performance aspect. But it does make things a little more complicated when you want to publish content quickly.
-
-To write content for the static blog site, we need to add markdown files in the `content` directory. For example, when
-you create a file `content/articles/2023-12-28/create-a-static-blog-with-nuxt.md` You'll end up with
-a page `/articles/2023-12-28/create-a-static-blog-with-nuxt/` when you run the build. 
+To write content for my new static blog site, I'm going to write markdown files in the `content/articles` folder
+of my project directory. For example, I can create a file `content/articles/2023-12-28/create-a-static-blog-with-nuxt.md` to
+get a page `/articles/2023-12-28/create-a-static-blog-with-nuxt/` after running the build. 
 
 To test things out, I added a basic blog post with the following content:
 
@@ -81,9 +69,9 @@ title: Create a static blog with nuxt
 This is a sample blog post.
 ```
 
-To render the content we'll need to set up a page that's going to load the markdown file. It's easiest if you use a page
-structure that mirrors the structure in the `content` directory. For me that meant, I had to create a
-file `pages/articles/[...slug].vue`.
+To render the content I needed to set up a page that's going to load the markdown file and render it. 
+It turns out that this works best if you use a page structure that mirrors the structure in the `content` directory. 
+For me that meant, I had to create a Vue component in the file `pages/articles/[...slug].vue`.
 
 The `[...slug]` part makes it so that any segment in the url after `/articles` is matched and leads to this page.
 
@@ -121,51 +109,140 @@ I modified the rendering by following these steps:
 
 * First, I added a `v-slot` attribute to expose the document under the variable `doc` within the scope of 
   the `ContentDoc` component. 
-* Then, I rendered some container divs and added a `<ContentRenderer>` component instance that refers to the `doc` 
+* Then, I rendered some container divs to provide a nice layout for my blog content.
+* Finally, I added a `<ContentRenderer>` component instance that refers to the `doc` 
   variable to render the content of the markdown file. 
 
 Note that I rendered the `title` property from the front-matter section in the markdown file separately.
 
-To verify that everything works, we can run the website with `npm run dev` and navigate
-to `https://localhost:3000/articles/2023-12-28/create-a-static-blog-with-nuxt`.
-
-Note that at this point, the website doesn't render as expected because I didn't use page rendering. I had to modify
+At this point, the website didn't render as expected because I didn't use page rendering. I had to modify
 `app.vue` to look like this:
 
 ```vue
-
+<template>
+    <NuxtPage />
+</template>
+<script setup lang="ts">
+useHead({
+    titleTemplate: '%s - My website'
+})
+</script>
 ```
+
+The template refers to a `NuxtPage` component that will load the `[...slug].vue` page I made for the website.
+After this modification I got the content to render.
+
+I also added a title template so that the blog post title is rendered in the `<title>` element of the HTML page.
+
+With the content rendering setup, I figured that it was time to see how the build would work.
 
 ## Generating static content
 
+You can host Nuxt websites on NodeJS or as static websites. I'm using the latter option because I don't need any server
+interaction. All content is the same for everyone who visits my website. 
 
+To generate a static website from a Nuxt application you can use the command:
 
 ```bash
 npm run generate
 ```
 
-After the build is completed, you can find the output in the `.output/public` directory. 
-
-To get the static site generation to work, I use the [Content module][CONTENT_MODULE] for Nuxt. This module 
-allows you to write blog posts under `content/articles/[date]/[slug].md`. Where of course you'll need to replace `[date]`
-with the actual date and `[slug]` with a sensible url-encoded string for the post title.
-
-The content for the post is rendered by a page `pages/articles/[...slug].vue`. This page works by loading the content
-from the right folder and rendering it into HTML. Feel free to checkout the [Content module][CONTENT_RENDERING] docs 
-to learn more on how to customize content rendering.
+After the build is completed, you can find the output in the `.output/public` directory. This is where I got suprprised.
 
 By default, Nuxt will crawl your website for content that needs to be pre-rendered into static content. 
-This excludes pages with a dynamic URL such as the one we're using for our blog posts. 
-To fix it, I've extended the config in `nuxt.config.js` to pre-crawl the blog posts and add them to the list of 
-pre-rendered pages.
+This excludes pages with a dynamic URL such as the one I'm using for my blog posts. I didn't know this, so I ended up
+with a very empty website. My sample content wasn't rendering at all.
 
-## Keeping things readable
+To fix it, I extended the config in `nuxt.config.js` to pre-crawl the blog posts and add them to the list of 
+pre-rendered pages. 
 
-This gist includes a couple of components and Tailwind CSS to help you produce a sensible layout for your blog.
-I prefer to use the tailwind CSS typography addon to get a nice [vertical rythm][VERTICAL_RYTHM].
+First, I added a new function to `nuxt.config.ts` to pre-crawl the content of my blog:
 
-Ideally you want to also limit the length of the lines in your prose to 65 characters. I'm not using
-quite that hard a limit. Instead I'm keeping the content container nice and narrow so everything is nice to read.
+```typescript
+function getPostUrls() {
+  return fs.readdirSync('content/articles')
+    .flatMap(directory => fs.readdirSync(path.join('content/articles', directory))
+      .map(file => path.join('content/articles/', directory, file))
+    )
+    .map(file => {
+      const slug = path.basename(file).replace(/\.md$/, "");
+      const postDate = path.basename(path.dirname(file));
+
+      return `/articles/${postDate}/${slug}`;
+    });
+}
+```
+
+The function reads all sub-directories from the `content/articles` folder and then the files from those sub-directories.
+I then map the file locations to a URL structure. The output of the function is a long list of URLs to my articles.
+
+After adding the pre-crawl function, I modified the configuration to look like this:
+
+```typescript
+export default defineNuxtConfig({
+  devtools: { enabled: true },
+  generate: {
+    routes: [
+      '/about',
+      '/',
+      ...getPostUrls()
+    ]
+  },
+  modules: ["@nuxt/content", "@nuxtjs/tailwindcss"]
+})
+```
+
+The generate section lists a routes property that contains the homepage, the about page, and the output
+of the `getPostUrls` function.
+
+Now when I run the build, the output includes all of the blog posts in the website even if they're not
+linked anywhere. 
+
+## Building a sitemap
+
+In the previous section I modified the configuration to render blogposts without linking to them anywhere. Later, I figured
+that I needed a sitemap for my website to be found properly on Google. Luckily, there's a module for that too.
+
+First, I setup the `nuxt-simple-sitemap` module:
+
+```bash
+npx nuxi@latest module add nuxt-simple-sitemap
+```
+
+Then, I added the following content to my configuration file to make the sitemap work correctly:
+
+```typescript
+export default defineNuxtConfig({
+  devtools: { enabled: true },
+  site: {
+    url: 'https://fizzylogic.nl',
+  },
+  generate: {
+    routes: [
+      '/about',
+      '/',
+      ...getPostUrls()
+    ]
+  },
+  modules: ["@nuxt/content", "@nuxtjs/tailwindcss", "nuxt-simple-sitemap"]
+})
+```
+
+Now when I run the build, I get a new file `sitemap.xml` which contains all the content in my blog.
+
+## Linking to posts from the homepage
+
+It's nice to have a sitemap for the search engine, but I want my homepage to list the latest blog posts. 
+For this, I needed to write a little bit more code. In my homepage component I'm listing the latest posts using this fragment:
+
+```vue
+<script lang="ts" setup>
+const { data: latestPosts } = await useAsyncData('home', () => queryContent('articles').only(['_path', 'title']).sort({ age: -1 }).limit(3).find());
+</script>
+```
+
+This fragment uses the `queryContent` function to search for content in the `content/articles` folder. I only want the title and the path to the article.
+The list should be sorted by age where the newest content is displayed first. Finally, I only want three items in the list for now.
 
 [VERTICAL_RYTHM]: https://imperavi.com/books/ui-typography/principles/vertical-rhythm/#:~:text=Vertical%20rhythm%20is%20typography%20built,%2C%20integrity%2C%20and%20design%20quality.
 [CONTENT_MODULE]: https://content.nuxt.com/
