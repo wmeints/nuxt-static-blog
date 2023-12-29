@@ -2,13 +2,33 @@
 title: "Building a static blog with Nuxt"
 ---
 
+As many know, I like to use my personal blog site for all sorts of experiments. I converted it from Wordpress
+to Ghost, and then to pure ASP.NET Core. This time I'm exploring the option to turn the whole thing into a static
+website with Nuxt. 
+<!-- more -->
 
+I tried several frameworks to build a static blog site. I tested Next.JS, Sveltekit, and Nuxt. All of these are
+awesome to build full-stack applications with. They're flexible, and very productive. However, not all of them
+are as easy to work with for static websites. That's why I settled on Nuxt, a framework that has the best options
+for building a static website so far.
+
+Please feel free to look at [the code on Github][EXAMPLE_REPO] to follow along.
 
 ## Getting started
 
-The basis for my blog going forward is Nuxt, a framework on top of Vue. It adds extra functionality to turn Vue
-from a client-side framework into a fully featured website building tool. To set up the static blog site, 
-I followed these steps:
+Nuxt is a framework on top of Vue. It adds extra functionality to turn Vue from a client-side framework into a
+fully featured website building tool. Vue is a Javascript component framework that allows you to build single-page
+applications, enrich existing applications, and server-side rendered applications when you host on NodeJS.
+
+Vue has a component model where a single component is hosted in a single file. The content of each component file
+is split in three parts: The template, a script section to control behavior, and a style section to control the looks.
+
+It's very flexible, because it doesn't prescribe a lot of things besides the component structure. Nuxt adds a few more 
+requirements on top, but it only adds to the productivity aspect. 
+
+Let's explore Nuxt by building a static blog site!
+
+To set up the static blog site, I followed these steps:
 
 1. Create a new project by executing `npx nuxi@latest init <project-name>`.
 2. Follow the instructions to set up the project. I recommend using TypeScript.
@@ -232,8 +252,8 @@ Now when I run the build, I get a new file `sitemap.xml` which contains all the 
 
 ## Linking to posts from the homepage
 
-It's nice to have a sitemap for the search engine, but I want my homepage to list the latest blog posts. 
-For this, I needed to write a little bit more code. In my homepage component I'm listing the latest posts using this fragment:
+My blog is easier to index with a sitemap, but I also want my homepage to list the latest blog posts so humans can come and visit. 
+For this, I needed to write a little bit more code. In my homepage component located under `pages/index.vue` I'm listing the latest posts using this fragment:
 
 ```vue
 <script lang="ts" setup>
@@ -244,6 +264,18 @@ const { data: latestPosts } = await useAsyncData('home', () => queryContent('art
 This fragment uses the `queryContent` function to search for content in the `content/articles` folder. I only want the title and the path to the article.
 The list should be sorted by age where the newest content is displayed first. Finally, I only want three items in the list for now.
 
+## Summary
+
+In this post we've covered quite a bit of ground. Getting started with Nuxt doesn't take a whole lot of time, but you'll find yourself exploring quite a few
+docs before you can start creating a working static blog site. This guide will help you get things going in the right direction a lot faster than
+exploring all the docs in Nuxt. 
+
+I found the whole process quite fun to be honest because it's something different from C# and Python. I'm not done yet, because I need to import my old content
+and then setup a pipeline to incorporate some AI where it makes sense. For example, I'd like to automatically attach tags and categories to my content.
+
+Overall a fun project for the holidays. I hope you enjoyed this read!
+
 [VERTICAL_RYTHM]: https://imperavi.com/books/ui-typography/principles/vertical-rhythm/#:~:text=Vertical%20rhythm%20is%20typography%20built,%2C%20integrity%2C%20and%20design%20quality.
 [CONTENT_MODULE]: https://content.nuxt.com/
 [CONTENT_RENDERING]: https://content.nuxt.com/usage/render
+[EXAMPLE_REPO]: https://github.com/wmeints/nuxt-static-blog
